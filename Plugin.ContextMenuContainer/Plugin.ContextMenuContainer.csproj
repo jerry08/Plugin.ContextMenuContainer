@@ -18,7 +18,7 @@
     <IsPackable>true</IsPackable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Authors>Elvin (Tharindu) Thudugala</Authors>
+    <Authors>Jerro</Authors>
     <PackageTags>android, ios, windows, uwp, maui, context, menu, container, popup, maui.menu, maui.popup, context.menu, .Net MAUI</PackageTags>
     <PackageProjectUrl>https://github.com/jerry08/Plugin.ContextMenuContainer</PackageProjectUrl>
     <RepositoryUrl>https://github.com/jerry08/Plugin.ContextMenuContainer</RepositoryUrl>
@@ -28,7 +28,7 @@
     <Description>Maui plugin to add native context menu to any view.</Description>
     <!--<PackageIcon>favicon.png</PackageIcon>-->
     <Copyright>Copyright © Jerry Berry</Copyright>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <PackageReleaseNotes>Check: https://github.com/jerry08/Plugin.ContextMenuContainer/releases </PackageReleaseNotes>
 
     <!--<PublishRepositoryUrl>true</PublishRepositoryUrl>
