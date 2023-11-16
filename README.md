@@ -2,16 +2,24 @@
 [![Version](https://img.shields.io/nuget/v/Plugin.ContextMenuContainer.svg)](https://nuget.org/packages/Plugin.ContextMenuContainer)
 [![Downloads](https://img.shields.io/nuget/dt/Plugin.ContextMenuContainer.svg)](https://nuget.org/packages/Plugin.ContextMenuContainer)
 
-Maui plugin to add native context menu to any view. Supports UWP, Android and iOS currently.
+Maui plugin to add native context menu to any view. Supports all .NET MAUI platforms.
 
-## How to use
-1. Add namespace to your XAML file 
+## Usage
+1. Add the `.UseContextMenu()` in your `MauiProgram.cs` as shown below:
+
+```C#
+using Plugin.ContextMenuContainer;
+```
+
+```C#
+builder
+    .UseMauiApp<App>()
+    .UseMauiCommunityToolkit()
+    .UseContextMenu();
+```
+
+2. Add namespace to your XAML file
     `xmlns:cm="https://github.com/jerry08/Plugin.ContextMenuContainer"`
-
-2. Add the following handler to your Maui startup class
-```
-    handlers.AddHandler(typeof(Plugin.ContextMenuContainer), typeof(Plugin.ContextMenuContainerRenderer));
-```
 
 3. Wrap your view with `ContextMenuContainer`, define your context actions inline or bind from your ViewModel
 ```
@@ -42,5 +50,5 @@ Maui plugin to add native context menu to any view. Supports UWP, Android and iO
             <Image Source="{Binding IconSource}"/>
         </Frame>
     </cm:ContextMenuContainer.Content>
-</apes:ContextMenuContainer>
+</cm:ContextMenuContainer>
 ```
