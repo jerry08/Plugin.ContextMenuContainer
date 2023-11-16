@@ -16,13 +16,11 @@ class FileImageSourceToBitmapIconSourceConverter : IValueConverter
             return result;
         if (!string.IsNullOrWhiteSpace(source.File))
         {
-            result = new BitmapIcon()
-            {
-                UriSource = new Uri(baseUri, source.File),
-            };
+            result = new BitmapIcon() { UriSource = new Uri(baseUri, source.File), };
         }
         return result;
     }
+
     public object ConvertBack(object value, Type targetType, object parameter, string language)
     {
         throw new NotSupportedException();

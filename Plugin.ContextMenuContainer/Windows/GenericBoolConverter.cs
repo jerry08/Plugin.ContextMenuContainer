@@ -1,7 +1,4 @@
 ﻿using System;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Controls;
 using IValueConverter = Microsoft.UI.Xaml.Data.IValueConverter;
 
 namespace Plugin.ContextMenuContainer;
@@ -9,7 +6,7 @@ namespace Plugin.ContextMenuContainer;
 class GenericBoolConverter<T> : IValueConverter
 {
     public T True { get; set; }
-    
+
     public T False { get; set; }
 
     public GenericBoolConverter(T True, T False)

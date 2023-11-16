@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using UIKit;
+﻿using Microsoft.Maui.Controls.Handlers.Compatibility;
 using Microsoft.Maui.Controls.Platform;
+using UIKit;
 
 namespace Plugin.ContextMenuContainer;
 
-public class ContextMenuContainerRenderer : Microsoft.Maui.Controls.Handlers.Compatibility.ViewRenderer<ContextMenuContainer, UIView>
+public class ContextMenuContainerRenderer : ViewRenderer<ContextMenuContainer, UIView>
 {
     ContextMenuDelegate? contextMenuDelegate;
     UIContextMenuInteraction? contextMenu;
@@ -38,13 +36,16 @@ public class ContextMenuContainerRenderer : Microsoft.Maui.Controls.Handlers.Com
             //contextMenu?.Dispose();
         }
     }
-    
+
     private void ConstructInteraction(ContextMenuItems menuItems)
     {
         DeconstructIntercation();
         if (menuItems?.Count > 0)
         {
-            contextMenuDelegate = new ContextMenuDelegate(menuItems, () => TraitCollection.UserInterfaceStyle);
+            contextMenuDelegate = new ContextMenuDelegate(
+                menuItems,
+                () => TraitCollection.UserInterfaceStyle
+            );
             contextMenu = new UIContextMenuInteraction(contextMenuDelegate);
             Control!.AddInteraction(contextMenu);
         }

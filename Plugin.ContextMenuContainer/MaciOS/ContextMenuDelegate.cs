@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
-using System.Text;
-using UIKit;
-using Foundation;
+using System.Linq;
 using CoreGraphics;
+using Foundation;
+using UIKit;
 
 namespace Plugin.ContextMenuContainer;
 
@@ -16,17 +15,23 @@ class ContextMenuDelegate : UIContextMenuInteractionDelegate
     private readonly Func<UIUserInterfaceStyle> GetCurrentTheme;
     private UIMenu? nativeMenu;
 
-    public ContextMenuDelegate(ContextMenuItems items, Func<UIUserInterfaceStyle> getCurrentTheme, INSCopying? identifier = null, Func<UIViewController>? preview = null)
+    public ContextMenuDelegate(
+        ContextMenuItems items,
+        Func<UIUserInterfaceStyle> getCurrentTheme,
+        INSCopying? identifier = null,
+        Func<UIViewController>? preview = null
+    )
     {
         MenuItems = items ?? throw new ArgumentNullException(nameof(items));
-        this.Identifier = identifier;
-        this.Preview = preview;
+        Identifier = identifier;
+        Preview = preview;
         GetCurrentTheme = getCurrentTheme;
     }
 
     IEnumerable<UIAction> ToNativeActions(IEnumerable<ContextMenuItem> sharedDefenitions)
     {
-        var iconColor = GetCurrentTheme() == UIUserInterfaceStyle.Dark ? UIColor.White : UIColor.Black;
+        var iconColor =
+            GetCurrentTheme() == UIUserInterfaceStyle.Dark ? UIColor.White : UIColor.Black;
         foreach (var item in sharedDefenitions)
         {
             if (!string.IsNullOrEmpty(item.Text))
@@ -35,7 +40,9 @@ class ContextMenuDelegate : UIContextMenuInteractionDelegate
                 if (item.Icon != null && !string.IsNullOrWhiteSpace(item.Icon.File))
                 {
                     nativeImage = new UIImage(item.Icon.File);
-                    nativeImage = nativeImage.ImageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate);
+                    nativeImage = nativeImage.ImageWithRenderingMode(
+                        UIImageRenderingMode.AlwaysTemplate
+                    );
                     nativeImage.ApplyTintColor(item.IsDestructive ? UIColor.Red : iconColor);
                 }
                 var nativeItem = UIAction.Create(item.Text, nativeImage, item.Text, ActionDelegate);
@@ -51,7 +58,7 @@ class ContextMenuDelegate : UIContextMenuInteractionDelegate
             }
         }
     }
-    
+
     private void ActionDelegate(UIAction action)
     {
         MenuItems[action.Identifier].OnItemTapped();
@@ -62,7 +69,9 @@ class ContextMenuDelegate : UIContextMenuInteractionDelegate
         if (nativeMenu is null)
             nativeMenu = UIMenu.Create(ToNativeActions(MenuItems).ToArray());
         else
-            nativeMenu = nativeMenu.GetMenuByReplacingChildren(ToNativeActions(MenuItems).ToArray());
+            nativeMenu = nativeMenu.GetMenuByReplacingChildren(
+                ToNativeActions(MenuItems).ToArray()
+            );
         return nativeMenu;
     }
 
@@ -71,9 +80,15 @@ class ContextMenuDelegate : UIContextMenuInteractionDelegate
         return Preview?.Invoke();
     }
 
-    public override UIContextMenuConfiguration GetConfigurationForMenu(UIContextMenuInteraction interaction, CGPoint location)
+    public override UIContextMenuConfiguration GetConfigurationForMenu(
+        UIContextMenuInteraction interaction,
+        CGPoint location
+    )
     {
-        return UIContextMenuConfiguration.Create(Identifier, Preview != null ?
-            PreviewDelegate! : null, ContructMenuFromItems);
+        return UIContextMenuConfiguration.Create(
+            Identifier,
+            Preview != null ? PreviewDelegate! : null,
+            ContructMenuFromItems
+        );
     }
 }

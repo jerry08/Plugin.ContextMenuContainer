@@ -1,33 +1,28 @@
 ﻿using System;
-using System.Linq;
-using System.ComponentModel;
-using System.Numerics;
-using System.Threading.Tasks;
-using System.Threading;
-using System.Collections.Generic;
 using System.Collections.Specialized;
+using Microsoft.Maui.Controls.Compatibility.Platform.UWP;
+using Microsoft.Maui.Controls.Platform;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Animation;
-using WColors = Microsoft.UI.Colors;
-using WBinding = Microsoft.UI.Xaml.Data.Binding;
-using Microsoft.Maui.Controls.Platform;
+using FlyoutBase = Microsoft.UI.Xaml.Controls.Primitives.FlyoutBase;
+using MenuFlyout = Microsoft.UI.Xaml.Controls.MenuFlyout;
 using MenuFlyoutItem = Microsoft.UI.Xaml.Controls.MenuFlyoutItem;
-using Style = Microsoft.UI.Xaml.Style;
 using Setter = Microsoft.UI.Xaml.Setter;
 using SolidColorBrush = Microsoft.UI.Xaml.Media.SolidColorBrush;
-using Microsoft.Maui.Controls.Compatibility.Platform.UWP;
+using Style = Microsoft.UI.Xaml.Style;
+using WBinding = Microsoft.UI.Xaml.Data.Binding;
+using WColors = Microsoft.UI.Colors;
 
-//[assembly: ExportRenderer(typeof(ContextMenuContainer), typeof(ContextMenuContainerRenderer))]
 namespace Plugin.ContextMenuContainer;
 
 //[Preserve(AllMembers = true)]
-public class ContextMenuContainerRenderer : Microsoft.Maui.Controls.Handlers.Compatibility.ViewRenderer<ContextMenuContainer, ContentControl>
+public class ContextMenuContainerRenderer
+    : Microsoft.Maui.Controls.Handlers.Compatibility.ViewRenderer<
+        ContextMenuContainer,
+        ContentControl
+    >
 {
     private FrameworkElement? content;
 
@@ -35,6 +30,7 @@ public class ContextMenuContainerRenderer : Microsoft.Maui.Controls.Handlers.Com
     {
         AutoPackage = false;
     }
+
     protected override void OnElementChanged(ElementChangedEventArgs<ContextMenuContainer> e)
     {
         base.OnElementChanged(e);
@@ -61,7 +57,7 @@ public class ContextMenuContainerRenderer : Microsoft.Maui.Controls.Handlers.Com
         if (Element?.Content is null)
             return;
 
-        IVisualElementRenderer renderer = Element.Content.GetOrCreateRenderer();
+        var renderer = Element.Content.GetOrCreateRenderer();
         content = renderer.ContainerElement;
         content.PointerReleased += Content_PointerReleased;
         //content.Holding += FrameworkElement_Holding;
@@ -93,7 +89,7 @@ public class ContextMenuContainerRenderer : Microsoft.Maui.Controls.Handlers.Com
             if (flyout.Items.Count != actions.Count)
                 return null;
 
-            for (int i = 0; i < flyout.Items.Count; i++)
+            for (var i = 0; i < flyout.Items.Count; i++)
                 if (flyout.Items[i].DataContext != actions[i])
                     return null;
 
@@ -139,10 +135,10 @@ public class ContextMenuContainerRenderer : Microsoft.Maui.Controls.Handlers.Com
     private void AddMenuItem(MenuFlyout contextMenu, ContextMenuItem item)
     {
         var nativeItem = new MenuFlyoutItem();
-        nativeItem.SetBinding(MenuFlyoutItem.TextProperty, new WBinding()
-        {
-            Path = new PropertyPath(nameof(ContextMenuItem.Text)),
-        });
+        nativeItem.SetBinding(
+            MenuFlyoutItem.TextProperty,
+            new WBinding() { Path = new PropertyPath(nameof(ContextMenuItem.Text)), }
+        );
 
         //nativeItem.SetBinding(MenuFlyoutItem.CommandProperty, new WBinding()
         //{
@@ -154,22 +150,28 @@ public class ContextMenuContainerRenderer : Microsoft.Maui.Controls.Handlers.Com
         //    Path = new PropertyPath(nameof(ContextMenuItem.CommandParameter)),
         //});
 
-        nativeItem.SetBinding(MenuFlyoutItem.IconProperty, new WBinding()
-        {
-            Path = new PropertyPath(nameof(ContextMenuItem.Icon)),
-            Converter = ImageConverter,
-        });
+        nativeItem.SetBinding(
+            MenuFlyoutItem.IconProperty,
+            new WBinding()
+            {
+                Path = new PropertyPath(nameof(ContextMenuItem.Icon)),
+                Converter = ImageConverter,
+            }
+        );
 
-        nativeItem.SetBinding(MenuFlyoutItem.StyleProperty, new WBinding()
-        {
-            Path = new PropertyPath(nameof(ContextMenuItem.IsDestructive)),
-            Converter = BoolToStytleConverter,
-        });
+        nativeItem.SetBinding(
+            MenuFlyoutItem.StyleProperty,
+            new WBinding()
+            {
+                Path = new PropertyPath(nameof(ContextMenuItem.IsDestructive)),
+                Converter = BoolToStytleConverter,
+            }
+        );
 
-        nativeItem.SetBinding(MenuFlyoutItem.IsEnabledProperty, new WBinding()
-        {
-            Path = new PropertyPath(nameof(ContextMenuItem.IsEnabled)),
-        });
+        nativeItem.SetBinding(
+            MenuFlyoutItem.IsEnabledProperty,
+            new WBinding() { Path = new PropertyPath(nameof(ContextMenuItem.IsEnabled)), }
+        );
 
         nativeItem.Click += NativeItem_Click;
         nativeItem.DataContext = item;
@@ -193,25 +195,29 @@ public class ContextMenuContainerRenderer : Microsoft.Maui.Controls.Handlers.Com
         context.OnItemTapped();
     }
 
-    private static Style DestructiveStyle { get; } = new Style()
-    {
-        TargetType = typeof(MenuFlyoutItem),
-        Setters =
+    private static Style DestructiveStyle { get; } =
+        new Style()
         {
-            new Setter(MenuFlyoutItem.ForegroundProperty, new SolidColorBrush(WColors.Red)),
-        }
-    };
+            TargetType = typeof(MenuFlyoutItem),
+            Setters =
+            {
+                new Setter(MenuFlyoutItem.ForegroundProperty, new SolidColorBrush(WColors.Red)),
+            }
+        };
 
-    private static Style NondDestructiveStyle { get; } = new Style()
-    {
-        TargetType = typeof(MenuFlyoutItem),
-        Setters =
+    private static Style NondDestructiveStyle { get; } =
+        new Style()
         {
-            //new Setter(MenuFlyoutItem.ForegroundProperty, new SolidColorBrush(WColors.Red)),
-        }
-    };
+            TargetType = typeof(MenuFlyoutItem),
+            Setters =
+            {
+                //new Setter(MenuFlyoutItem.ForegroundProperty, new SolidColorBrush(WColors.Red)),
+            }
+        };
 
-    private static FileImageSourceToBitmapIconSourceConverter ImageConverter { get; } = new FileImageSourceToBitmapIconSourceConverter();
+    private static FileImageSourceToBitmapIconSourceConverter ImageConverter { get; } =
+        new FileImageSourceToBitmapIconSourceConverter();
 
-    private static GenericBoolConverter<Style> BoolToStytleConverter { get; } = new(DestructiveStyle, NondDestructiveStyle);
+    private static GenericBoolConverter<Style> BoolToStytleConverter { get; } =
+        new(DestructiveStyle, NondDestructiveStyle);
 }

@@ -1,22 +1,18 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
-using Android.App;
 using Android.Content;
-using Android.Graphics;
 using Android.OS;
-using Android.Views;
 using Android.Text;
 using Android.Text.Style;
-using Android.Graphics.Drawables;
+using Android.Views;
+using AndroidX.AppCompat.Graphics.Drawable;
 using AndroidX.AppCompat.Widget;
-using DrawableWrapperX = AndroidX.AppCompat.Graphics.Drawable.DrawableWrapper;
-using Java.Lang.Reflect;
-using Path = System.IO.Path;
-using AColor = Android.Graphics.Color;
 using Microsoft.Maui.Controls.Compatibility.Platform.Android;
 using Microsoft.Maui.Controls.Platform;
-
+using Microsoft.Maui.Dispatching;
+using AColor = Android.Graphics.Color;
+using Path = System.IO.Path;
 using ViewRenderer = Microsoft.Maui.Controls.Handlers.Compatibility.ViewRenderer;
 
 namespace Plugin.ContextMenuContainer;
@@ -25,11 +21,12 @@ public class ContextMenuContainerRenderer : ViewRenderer
 {
     private PopupMenu? contextMenu;
 
-    public ContextMenuContainerRenderer(Context context) : base(context)
-    {
-    }
+    public ContextMenuContainerRenderer(Context context)
+        : base(context) { }
 
-    protected override void OnElementChanged(ElementChangedEventArgs<Microsoft.Maui.Controls.View> e)
+    protected override void OnElementChanged(
+        ElementChangedEventArgs<Microsoft.Maui.Controls.View> e
+    )
     {
         base.OnElementChanged(e);
 
@@ -37,7 +34,7 @@ public class ContextMenuContainerRenderer : ViewRenderer
         {
             old.BindingContextChanged -= Element_BindingContextChanged;
             old.MenuItems.CollectionChanged -= MenuItems_CollectionChanged;
-            
+
             old.OpenContextMenu = null;
         }
 
@@ -55,12 +52,14 @@ public class ContextMenuContainerRenderer : ViewRenderer
         var child = GetChildAt(0);
         if (child is null)
             return;
-        contextMenu = new PopupMenu(Context, child);
+        contextMenu = new PopupMenu(Context!, child);
         contextMenu.MenuItemClick += ContextMenu_MenuItemClick;
         var field = contextMenu.Class.GetDeclaredField("mPopup");
         field.Accessible = true;
         var menuPopupHelper = field.Get(contextMenu);
-        var setForceIcons = menuPopupHelper?.Class.GetDeclaredMethod("setForceShowIcon", Java.Lang.Boolean.Type!);
+        var setForceIcons = menuPopupHelper
+            ?.Class
+            .GetDeclaredMethod("setForceShowIcon", Java.Lang.Boolean.Type!);
         setForceIcons?.Invoke(menuPopupHelper, true);
     }
 
@@ -97,12 +96,13 @@ public class ContextMenuContainerRenderer : ViewRenderer
             var id = Context.GetDrawableId(name);
             if (id != 0)
             {
-                var drawable = (int)Build.VERSION.SdkInt >= 21 ?
-                     Context?.GetDrawable(id) :
-                     Context?.GetDrawable(name);
+                var drawable =
+                    (int)Build.VERSION.SdkInt >= 21
+                        ? Context?.GetDrawable(id)
+                        : Context?.GetDrawable(name);
                 if (drawable is not null)
                 {
-                    var wrapper = new DrawableWrapperX(drawable);
+                    var wrapper = new DrawableWrapperCompat(drawable);
                     if (item.IsDestructive)
                         wrapper.SetTint(AColor.Red);
 
@@ -145,9 +145,14 @@ public class ContextMenuContainerRenderer : ViewRenderer
             }
             else
             {
-                for (int i = 0; i < contextMenu.Menu.Size(); i++)
+                for (var i = 0; i < contextMenu.Menu.Size(); i++)
                 {
-                    if (!element.MenuItems[i].Text.Equals(contextMenu.Menu.GetItem(i)?.TitleFormatted?.ToString()))
+                    if (
+                        !element
+                            .MenuItems[i]
+                            .Text
+                            .Equals(contextMenu.Menu.GetItem(i)?.TitleFormatted?.ToString())
+                    )
                     {
                         DeconstructNativeMenu();
                         break;
@@ -158,7 +163,10 @@ public class ContextMenuContainerRenderer : ViewRenderer
         return contextMenu;
     }
 
-    private void MenuItems_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    private void MenuItems_CollectionChanged(
+        object? sender,
+        System.Collections.Specialized.NotifyCollectionChangedEventArgs e
+    )
     {
         RefillMenuItems();
     }
@@ -170,27 +178,32 @@ public class ContextMenuContainerRenderer : ViewRenderer
 
     private void ContextMenu_MenuItemClick(object? sender, PopupMenu.MenuItemClickEventArgs e)
     {
-        var item = ((ContextMenuContainer)Element!).MenuItems.FirstOrDefault(x => x.Text == e.Item.TitleFormatted?.ToString());
+        var item = ((ContextMenuContainer)Element!)
+            .MenuItems
+            .FirstOrDefault(x => x.Text == e.Item?.TitleFormatted?.ToString());
         item?.OnItemTapped();
     }
 
-    private bool enabled => Element is ContextMenuContainer element && element.MenuItems.Count > 0;
+    private bool _enabled => Element is ContextMenuContainer element && element.MenuItems.Count > 0;
     private MyTimer timer = default!;
     private bool timerFired = false;
 
     public override bool DispatchTouchEvent(MotionEvent? e)
     {
         bool result;
-        Logger.Debug("ContextMEnuContainer DispatchTouchEvent fired {0}", e!.Action);
-        if (enabled && e.Action == MotionEventActions.Down)
+        Logger.Debug("ContextMenuContainer DispatchTouchEvent fired {0}", e!.Action);
+        if (_enabled && e.Action == MotionEventActions.Down)
         {
             //You can change the timespan of the long press
             timerFired = false;
-            timer = new MyTimer(TimeSpan.FromMilliseconds(500), () =>
-            {
-                timerFired = true;
-                OpenContextMenu();
-            });
+            timer = new MyTimer(
+                TimeSpan.FromMilliseconds(500),
+                () =>
+                {
+                    timerFired = true;
+                    OpenContextMenu();
+                }
+            );
             timer.Start();
         }
 
@@ -205,9 +218,9 @@ public class ContextMenuContainerRenderer : ViewRenderer
         }
         else
         {
-            result =  base.DispatchTouchEvent(e);
-            
-            if(!result && enabled)
+            result = base.DispatchTouchEvent(e);
+
+            if (!result && _enabled)
                 result = true;
         }
 
@@ -236,27 +249,32 @@ public class ContextMenuContainerRenderer : ViewRenderer
         {
             this.timespan = timespan;
             this.callback = callback;
-            this.cancellation = new CancellationTokenSource();
+            cancellation = new CancellationTokenSource();
         }
 
         public void Start()
         {
-            var cts = this.cancellation; // safe copy
-            Device.StartTimer(this.timespan,
-                () =>
-                {
-                    if (cts.IsCancellationRequested)
-                        return false;
-                    
-                    this.callback.Invoke();
+            var cts = cancellation; // safe copy
 
-                    return false; // or true for periodic behavior
-                });
+            Dispatcher
+                .GetForCurrentThread()
+                ?.StartTimer(
+                    timespan,
+                    () =>
+                    {
+                        if (cts.IsCancellationRequested)
+                            return false;
+
+                        callback.Invoke();
+
+                        return false; // or true for periodic behavior
+                    }
+                );
         }
 
         public void Stop()
         {
-            Interlocked.Exchange(ref this.cancellation, new CancellationTokenSource()).Cancel();
+            Interlocked.Exchange(ref cancellation, new CancellationTokenSource()).Cancel();
         }
     }
 }
