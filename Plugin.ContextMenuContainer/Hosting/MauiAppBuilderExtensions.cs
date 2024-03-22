@@ -4,7 +4,7 @@ namespace Plugin.ContextMenuContainer;
 
 public static class MauiAppBuilderExtensions
 {
-    public static MauiAppBuilder UseContextMenu(this MauiAppBuilder builder)
+    public static MauiAppBuilder ConfigureContextMenuContainer(this MauiAppBuilder builder)
     {
         return builder.ConfigureMauiHandlers(handlers =>
         {

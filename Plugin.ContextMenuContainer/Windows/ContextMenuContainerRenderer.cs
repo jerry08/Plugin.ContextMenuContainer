@@ -1,79 +1,56 @@
 ﻿using System;
 using System.Collections.Specialized;
-using Microsoft.Maui.Controls.Compatibility.Platform.UWP;
-using Microsoft.Maui.Controls.Platform;
+using Microsoft.Maui.Controls.Internals;
+using Microsoft.Maui.Handlers;
+using Microsoft.Maui.Platform;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
-using FlyoutBase = Microsoft.UI.Xaml.Controls.Primitives.FlyoutBase;
-using MenuFlyout = Microsoft.UI.Xaml.Controls.MenuFlyout;
 using MenuFlyoutItem = Microsoft.UI.Xaml.Controls.MenuFlyoutItem;
 using Setter = Microsoft.UI.Xaml.Setter;
 using SolidColorBrush = Microsoft.UI.Xaml.Media.SolidColorBrush;
 using Style = Microsoft.UI.Xaml.Style;
 using WBinding = Microsoft.UI.Xaml.Data.Binding;
 using WColors = Microsoft.UI.Colors;
+using WControl = Microsoft.UI.Xaml.Controls.Control;
 
 namespace Plugin.ContextMenuContainer;
 
-//[Preserve(AllMembers = true)]
-public class ContextMenuContainerRenderer
-    : Microsoft.Maui.Controls.Handlers.Compatibility.ViewRenderer<
-        ContextMenuContainer,
-        ContentControl
-    >
+[Preserve(AllMembers = true)]
+internal sealed class ContextMenuContainerRenderer : ContentViewHandler
 {
-    private FrameworkElement? content;
+    private ContextMenuContainer Element => (ContextMenuContainer)VirtualView;
 
-    public ContextMenuContainerRenderer()
+    protected override ContentPanel CreatePlatformView()
     {
-        AutoPackage = false;
+        var result = base.CreatePlatformView();
+        result.PointerReleased += PlatformViewPointerReleased;
+        return result;
     }
 
-    protected override void OnElementChanged(ElementChangedEventArgs<ContextMenuContainer> e)
+    // ReSharper disable once InconsistentNaming
+#pragma warning disable SA1300
+#pragma warning disable SA1201
+    private FrameworkElement _platformView => PlatformView;
+#pragma warning restore SA1201
+#pragma warning restore SA1300
+
+    private void PlatformViewPointerReleased(object sender, PointerRoutedEventArgs e)
     {
-        base.OnElementChanged(e);
-        if (e.OldElement is not null)
-        {
-            //unsubscribe from events here
-        }
-
-        if (e.NewElement is null)
-        {
-            return;
-        }
-
-        if (Control is null)
-        {
-            SetNativeControl(new ContentControl());
-        }
-
-        Pack();
-    }
-
-    private void Pack()
-    {
-        if (Element?.Content is null)
-            return;
-
-        var renderer = Element.Content.GetOrCreateRenderer();
-        content = renderer.ContainerElement;
-        content.PointerReleased += Content_PointerReleased;
-        //content.Holding += FrameworkElement_Holding;
-        Control!.Content = content;
-    }
-
-    private void Content_PointerReleased(object sender, PointerRoutedEventArgs e)
-    {
-        var point = e.GetCurrentPoint(content);
+        var point = e.GetCurrentPoint(_platformView);
         if (point.Properties.PointerUpdateKind != PointerUpdateKind.RightButtonReleased)
+        {
             return;
+        }
 
         try
         {
-            if (Element!.HasMenuOptions())
+            if (Element.HasMenuOptions())
+            {
                 OpenContextMenu();
+            }
         }
         catch (Exception ex)
         {
@@ -83,15 +60,21 @@ public class ContextMenuContainerRenderer
 
     private MenuFlyout? GetContextMenu()
     {
-        if (FlyoutBase.GetAttachedFlyout(content) is MenuFlyout flyout)
+        if (FlyoutBase.GetAttachedFlyout(_platformView) is MenuFlyout flyout)
         {
-            var actions = Element!.MenuItems;
-            if (flyout.Items.Count != actions.Count)
+            var actions = Element.MenuItems;
+            if (flyout.Items?.Count != actions?.Count)
+            {
                 return null;
+            }
 
-            for (var i = 0; i < flyout.Items.Count; i++)
-                if (flyout.Items[i].DataContext != actions[i])
+            for (var i = 0; i < flyout.Items?.Count; i++)
+            {
+                if (flyout.Items[i].DataContext != actions?[i])
+                {
                     return null;
+                }
+            }
 
             return flyout;
         }
@@ -101,17 +84,20 @@ public class ContextMenuContainerRenderer
 
     private void OpenContextMenu()
     {
-        if (GetContextMenu() is null)
+        if (GetContextMenu() == null)
         {
             var flyout = new MenuFlyout();
             SetupMenuItems(flyout);
 
-            Element!.MenuItems.CollectionChanged += MenuItems_CollectionChanged;
+            if (Element.MenuItems != null)
+            {
+                Element.MenuItems.CollectionChanged += MenuItems_CollectionChanged;
+            }
 
-            FlyoutBase.SetAttachedFlyout(content, flyout);
+            FlyoutBase.SetAttachedFlyout(_platformView, flyout);
         }
 
-        FlyoutBase.ShowAttachedFlyout(content);
+        FlyoutBase.ShowAttachedFlyout(_platformView);
     }
 
     private void MenuItems_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -119,16 +105,20 @@ public class ContextMenuContainerRenderer
         var menu = GetContextMenu();
         if (menu != null)
         {
-            menu.Items.Clear();
+            menu.Items?.Clear();
+
             SetupMenuItems(menu);
         }
     }
 
     private void SetupMenuItems(MenuFlyout menu)
     {
-        foreach (var item in Element!.MenuItems)
+        if (Element.MenuItems != null)
         {
-            AddMenuItem(menu, item);
+            foreach (var item in Element.MenuItems)
+            {
+                AddMenuItem(menu, item);
+            }
         }
     }
 
@@ -137,50 +127,43 @@ public class ContextMenuContainerRenderer
         var nativeItem = new MenuFlyoutItem();
         nativeItem.SetBinding(
             MenuFlyoutItem.TextProperty,
-            new WBinding() { Path = new PropertyPath(nameof(ContextMenuItem.Text)), }
+            new WBinding() { Path = new PropertyPath(nameof(ContextMenuItem.Text)) }
         );
 
-        //nativeItem.SetBinding(MenuFlyoutItem.CommandProperty, new WBinding()
-        //{
-        //    Path = new PropertyPath(nameof(ContextMenuItem.Command)),
-        //});
-
-        //nativeItem.SetBinding(MenuFlyoutItem.CommandParameterProperty, new WBinding()
-        //{
-        //    Path = new PropertyPath(nameof(ContextMenuItem.CommandParameter)),
-        //});
-
-        nativeItem.SetBinding(
-            MenuFlyoutItem.IconProperty,
-            new WBinding()
-            {
-                Path = new PropertyPath(nameof(ContextMenuItem.Icon)),
-                Converter = ImageConverter,
-            }
-        );
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (ImageConverter != null)
+        {
+            nativeItem.SetBinding(
+                MenuFlyoutItem.IconProperty,
+                new WBinding()
+                {
+                    Path = new PropertyPath(nameof(ContextMenuItem.Icon)),
+                    Converter = ImageConverter
+                }
+            );
+        }
 
         nativeItem.SetBinding(
-            MenuFlyoutItem.StyleProperty,
+            FrameworkElement.StyleProperty,
             new WBinding()
             {
                 Path = new PropertyPath(nameof(ContextMenuItem.IsDestructive)),
-                Converter = BoolToStytleConverter,
+                Converter = BoolToStyleConverter,
             }
         );
-
         nativeItem.SetBinding(
-            MenuFlyoutItem.IsEnabledProperty,
-            new WBinding() { Path = new PropertyPath(nameof(ContextMenuItem.IsEnabled)), }
+            WControl.IsEnabledProperty,
+            new WBinding() { Path = new PropertyPath(nameof(ContextMenuItem.IsEnabled)) }
         );
-
         nativeItem.Click += NativeItem_Click;
         nativeItem.DataContext = item;
-        contextMenu.Items.Add(nativeItem);
+        contextMenu.Items?.Add(nativeItem);
     }
 
     private void NativeItem_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is not MenuFlyoutItem item)
+        var item = sender as MenuFlyoutItem;
+        if (item == null)
         {
             Logger.Error("Couldn't cast to MenuFlyoutItem");
             return;
@@ -195,29 +178,31 @@ public class ContextMenuContainerRenderer
         context.OnItemTapped();
     }
 
+#pragma warning disable SA1201
     private static Style DestructiveStyle { get; } =
         new Style()
+#pragma warning restore SA1201
         {
             TargetType = typeof(MenuFlyoutItem),
             Setters =
             {
-                new Setter(MenuFlyoutItem.ForegroundProperty, new SolidColorBrush(WColors.Red)),
-            }
+                new Setter(WControl.ForegroundProperty, new SolidColorBrush(WColors.Red)),
+            },
         };
 
-    private static Style NondDestructiveStyle { get; } =
+    private static Style NonDestructiveStyle { get; } =
         new Style()
         {
             TargetType = typeof(MenuFlyoutItem),
             Setters =
             {
-                //new Setter(MenuFlyoutItem.ForegroundProperty, new SolidColorBrush(WColors.Red)),
-            }
+                // new Setter(MenuFlyoutItem.ForegroundProperty, new SolidColorBrush(WColors.Red)),
+            },
         };
 
     private static FileImageSourceToBitmapIconSourceConverter ImageConverter { get; } =
         new FileImageSourceToBitmapIconSourceConverter();
 
-    private static GenericBoolConverter<Style> BoolToStytleConverter { get; } =
-        new(DestructiveStyle, NondDestructiveStyle);
+    private static GenericBoolConverter<Style> BoolToStyleConverter { get; } =
+        new(DestructiveStyle, NonDestructiveStyle);
 }

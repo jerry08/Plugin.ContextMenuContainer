@@ -5,36 +5,71 @@ namespace Plugin.ContextMenuContainer;
 
 public class ContextMenuContainer : ContentView
 {
-    /// <summary>
-    /// Call this in order to preserve our code during linking and allow namespace resolution in XAML
-    /// </summary>
-    public static void Init()
-    {
-        //maybe do something here later
-    }
-
     public static readonly BindableProperty MenuItemsProperty = BindableProperty.Create(
         nameof(MenuItems),
         typeof(ContextMenuItems),
         typeof(VisualElement),
-        defaultValueCreator: DefaulfMenuItemsCreator,
+        defaultValueCreator: DefaultMenuItemsCreator,
         propertyChanged: OnMenuItemsChanged
     );
 
-    private static object DefaulfMenuItemsCreator(BindableObject bindableObject)
+    public ContextMenuItems? MenuItems
+    {
+        get => (ContextMenuItems?)GetValue(MenuItemsProperty);
+        set => SetValue(MenuItemsProperty, value);
+    }
+
+    public static readonly BindableProperty ShowOnClickProperty = BindableProperty.Create(
+        nameof(ShowOnClick),
+        typeof(bool),
+        typeof(ContextMenuContainer),
+        true
+    );
+
+    public bool ShowOnClick
+    {
+        get => (bool)GetValue(ShowOnClickProperty);
+        set => SetValue(ShowOnClickProperty, value);
+    }
+
+    /// <summary>
+    /// Call this in order to preserve our code during linking and allow namespace resolution in XAML.
+    /// </summary>
+    public static void Init()
+    {
+        // maybe do something here later
+    }
+
+    protected override void OnBindingContextChanged()
+    {
+        base.OnBindingContextChanged();
+        if (MenuItems != null)
+        {
+            SetBindingContextForItems(MenuItems);
+        }
+    }
+
+    private static object DefaultMenuItemsCreator(BindableObject bindableObject)
     {
         var menuItems = new ContextMenuItems();
-        menuItems.CollectionChanged += (s, e) =>
+        menuItems.CollectionChanged += (_, e) =>
         {
-            if (e.OldItems is not null)
+            if (e.OldItems != null)
+            {
                 foreach (ContextMenuItem item in e.OldItems)
-                    item.RemoveBinding(ContextMenuItem.BindingContextProperty);
+                {
+                    item.RemoveBinding(BindingContextProperty);
+                }
+            }
 
-            if (e.NewItems is not null)
+            if (e.NewItems != null)
+            {
                 foreach (ContextMenuItem item in e.NewItems)
-                    BindableObject.SetInheritedBindingContext(item, bindableObject.BindingContext);
+                {
+                    SetInheritedBindingContext(item, bindableObject.BindingContext);
+                }
+            }
         };
-
         return menuItems;
     }
 
@@ -47,65 +82,39 @@ public class ContextMenuContainer : ContentView
         if (oldValue is ContextMenuItems oldItems)
         {
             foreach (var item in oldItems)
-                item.RemoveBinding(ContextMenuContainer.BindingContextProperty);
+            {
+                item.RemoveBinding(BindingContextProperty);
+            }
 
-            //oldItems.CollectionChanged -= MenuItems_CollectionChanged;
+            // oldItems.CollectionChanged -= MenuItems_CollectionChanged;
         }
 
         if (newValue is ContextMenuItems newItems)
+        {
             foreach (var item in newItems)
-                BindableObject.SetInheritedBindingContext(item, bindableObject.BindingContext);
-    }
-
-    //private static void MenuItems_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-    //{
-    //    if (e.OldItems != null)
-    //    {
-    //        foreach (ContextMenuItem item in e.OldItems)
-    //        {
-    //            item.RemoveBinding(ContextMenuItem.BindingContextProperty);
-    //        }
-    //    }
-    //    if (e.NewItems != null)
-    //    {
-    //        ((ContextMenuContainer)sender).SetBindingContextForItems((IList<ContextMenuItem>)e.NewItems);
-    //    }
-    //}
-
-    public ContextMenuItems MenuItems
-    {
-        get => (ContextMenuItems)GetValue(MenuItemsProperty);
-        set => SetValue(MenuItemsProperty, value);
-    }
-
-    protected override void OnBindingContextChanged()
-    {
-        base.OnBindingContextChanged();
-        SetBindingContextForItems(MenuItems);
+            {
+                SetInheritedBindingContext(item, bindableObject.BindingContext);
+            }
+        }
     }
 
     private void SetBindingContextForItems(IList<ContextMenuItem> items)
     {
         for (var i = 0; i < items.Count; i++)
+        {
             SetBindingContextForItem(items[i]);
+        }
     }
 
-    private void SetBindingContextForItem(ContextMenuItem item)
-    {
-        BindableObject.SetInheritedBindingContext(item, BindingContext);
-    }
-
-    public ContextMenuContainer()
-    {
-        //GestureRecognizers.Add();
-    }
+    private void SetBindingContextForItem(ContextMenuItem item) =>
+        SetInheritedBindingContext(item, BindingContext);
 
     public void Show()
     {
         OpenContextMenu?.Invoke();
     }
 
-    internal OpenContextMenuDelegate? OpenContextMenu;
+    internal OpenContextMenuDelegate? OpenContextMenu { get; set; }
 
     public delegate void OpenContextMenuDelegate();
 }

@@ -10,8 +10,12 @@ public class ContextMenuItems : ObservableCollection<ContextMenuItem>
     private ContextMenuItem FindTextIndex(string text)
     {
         for (var j = 0; j < Items.Count; j++)
+        {
             if (Items[j].Text == text)
+            {
                 return Items[j];
+            }
+        }
 
         throw new ArgumentOutOfRangeException(
             nameof(text),

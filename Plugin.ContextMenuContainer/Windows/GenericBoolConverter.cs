@@ -3,26 +3,26 @@ using IValueConverter = Microsoft.UI.Xaml.Data.IValueConverter;
 
 namespace Plugin.ContextMenuContainer;
 
-class GenericBoolConverter<T> : IValueConverter
+internal class GenericBoolConverter<T> : IValueConverter
 {
+    public GenericBoolConverter(T @true, T @false)
+    {
+        True = @true ?? throw new ArgumentNullException(nameof(@true));
+        False = @false ?? throw new ArgumentNullException(nameof(@false));
+    }
+
+    // ReSharper disable once MemberCanBePrivate.Global
     public T True { get; set; }
 
+    // ReSharper disable once MemberCanBePrivate.Global
     public T False { get; set; }
 
-    public GenericBoolConverter(T True, T False)
-    {
-        this.True = True ?? throw new ArgumentNullException(nameof(True));
-        this.False = False ?? throw new ArgumentNullException(nameof(False));
-    }
-
-    public object? Convert(object? value, Type targetType, object parameter, string language)
+    public object Convert(object value, Type targetType, object parameter, string language)
     {
         var boolean = value as bool?;
-        return (boolean ?? false) ? True : False;
+        return (boolean ?? false ? True : False)!;
     }
 
-    public object ConvertBack(object value, Type targetType, object parameter, string language)
-    {
+    public object ConvertBack(object value, Type targetType, object parameter, string language) =>
         throw new NotSupportedException();
-    }
 }

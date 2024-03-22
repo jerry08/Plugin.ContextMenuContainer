@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using CoreGraphics;
 using Foundation;
+using Microsoft.Maui.Controls.Compatibility.Platform.iOS;
 using UIKit;
 
 namespace Plugin.ContextMenuContainer;
 
-class ContextMenuDelegate : UIContextMenuInteractionDelegate
+internal class ContextMenuDelegate : UIContextMenuInteractionDelegate
 {
-    private readonly INSCopying? Identifier;
-    private readonly Func<UIViewController>? Preview;
-    private readonly ContextMenuItems MenuItems;
-    private readonly Func<UIUserInterfaceStyle> GetCurrentTheme;
-    private UIMenu? nativeMenu;
+    private readonly INSCopying? _identifier;
+    private readonly Func<UIViewController>? _preview;
+    private readonly ContextMenuItems _menuItems;
+    private readonly Func<UIUserInterfaceStyle> _getCurrentTheme;
+    private UIMenu? _nativeMenu;
 
     public ContextMenuDelegate(
         ContextMenuItems items,
@@ -22,17 +23,35 @@ class ContextMenuDelegate : UIContextMenuInteractionDelegate
         Func<UIViewController>? preview = null
     )
     {
-        MenuItems = items ?? throw new ArgumentNullException(nameof(items));
-        Identifier = identifier;
-        Preview = preview;
-        GetCurrentTheme = getCurrentTheme;
+        _menuItems = items ?? throw new ArgumentNullException(nameof(items));
+        _identifier = identifier;
+        _preview = preview;
+        _getCurrentTheme = getCurrentTheme;
     }
 
-    IEnumerable<UIAction> ToNativeActions(IEnumerable<ContextMenuItem> sharedDefenitions)
+    public UIMenu? GetMenu()
+    {
+        ConstructMenuFromItems([]);
+        return _nativeMenu;
+    }
+
+    public override UIContextMenuConfiguration GetConfigurationForMenu(
+        UIContextMenuInteraction interaction,
+        CGPoint location
+    ) =>
+        UIContextMenuConfiguration.Create(
+            _identifier,
+            _preview != null ? PreviewDelegate! : null,
+            ConstructMenuFromItems
+        );
+
+    private IEnumerable<UIMenuElement> ToNativeActions(
+        IEnumerable<ContextMenuItem> sharedDefinitions
+    )
     {
         var iconColor =
-            GetCurrentTheme() == UIUserInterfaceStyle.Dark ? UIColor.White : UIColor.Black;
-        foreach (var item in sharedDefenitions)
+            _getCurrentTheme() == UIUserInterfaceStyle.Dark ? UIColor.White : UIColor.Black;
+        foreach (var item in sharedDefinitions)
         {
             if (!string.IsNullOrEmpty(item.Text))
             {
@@ -45,11 +64,18 @@ class ContextMenuDelegate : UIContextMenuInteractionDelegate
                     );
                     nativeImage.ApplyTintColor(item.IsDestructive ? UIColor.Red : iconColor);
                 }
+
                 var nativeItem = UIAction.Create(item.Text, nativeImage, item.Text, ActionDelegate);
                 if (!item.IsEnabled)
+                {
                     nativeItem.Attributes |= UIMenuElementAttributes.Disabled;
+                }
+
                 if (item.IsDestructive)
+                {
                     nativeItem.Attributes |= UIMenuElementAttributes.Destructive;
+                }
+
                 yield return nativeItem;
             }
             else
@@ -59,36 +85,16 @@ class ContextMenuDelegate : UIContextMenuInteractionDelegate
         }
     }
 
-    private void ActionDelegate(UIAction action)
+    private void ActionDelegate(UIAction action) => _menuItems[action.Identifier].OnItemTapped();
+
+    private UIMenu ConstructMenuFromItems(UIMenuElement[] suggestedActions)
     {
-        MenuItems[action.Identifier].OnItemTapped();
+        _nativeMenu =
+            _nativeMenu == null
+                ? UIMenu.Create(ToNativeActions(_menuItems).ToArray())
+                : _nativeMenu.GetMenuByReplacingChildren(ToNativeActions(_menuItems).ToArray());
+        return _nativeMenu;
     }
 
-    private UIMenu ContructMenuFromItems(UIMenuElement[] suggestedActions)
-    {
-        if (nativeMenu is null)
-            nativeMenu = UIMenu.Create(ToNativeActions(MenuItems).ToArray());
-        else
-            nativeMenu = nativeMenu.GetMenuByReplacingChildren(
-                ToNativeActions(MenuItems).ToArray()
-            );
-        return nativeMenu;
-    }
-
-    private UIViewController? PreviewDelegate()
-    {
-        return Preview?.Invoke();
-    }
-
-    public override UIContextMenuConfiguration GetConfigurationForMenu(
-        UIContextMenuInteraction interaction,
-        CGPoint location
-    )
-    {
-        return UIContextMenuConfiguration.Create(
-            Identifier,
-            Preview != null ? PreviewDelegate! : null,
-            ContructMenuFromItems
-        );
-    }
+    public UIViewController? PreviewDelegate() => _preview?.Invoke();
 }
