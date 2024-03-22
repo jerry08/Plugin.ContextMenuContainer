@@ -7,34 +7,7 @@
 		<!-- <TargetFrameworks>$(TargetFrameworks);$(NetVersion)-tizen</TargetFrameworks> -->
     <UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
-    <!--<ImplicitUsings>enable</ImplicitUsings>-->
-		<Nullable>enable</Nullable>
-
-    <DefaultLanguage>en-US</DefaultLanguage>
-    <AutoGenerateBindingRedirects>True</AutoGenerateBindingRedirects>
-    <NeutralLanguage>en</NeutralLanguage>
-    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
-
     <IsPackable>true</IsPackable>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Authors>Jerro</Authors>
-    <PackageTags>android, ios, windows, uwp, maui, context, menu, container, popup, maui.menu, maui.popup, context.menu, .Net MAUI</PackageTags>
-    <PackageProjectUrl>https://github.com/jerry08/Plugin.ContextMenuContainer</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/jerry08/Plugin.ContextMenuContainer</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Description>Maui plugin to add native context menu to any view.</Description>
-    <!--<PackageIcon>favicon.png</PackageIcon>-->
-    <Copyright>Copyright © Jerry Berry</Copyright>
-    <Version>1.0.4</Version>
-    <PackageReleaseNotes>Check: https://github.com/jerry08/Plugin.ContextMenuContainer/releases </PackageReleaseNotes>
-
-    <!--<PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>-->
 
     <PackageReadmeFile>README.md</PackageReadmeFile>
 

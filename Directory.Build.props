@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <Version>1.0.4</Version>
+    <Version>1.0.5</Version>
     <NetVersion>net8.0</NetVersion>
     <Company>Jerro</Company>
     <Copyright>Copyright (C) Jerro</Copyright>
@@ -9,6 +9,18 @@
     <Nullable>enable</Nullable>
     <WarningsAsErrors>nullable</WarningsAsErrors>
     <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Authors>$(Company)</Authors>
+    <PackageTags>android, ios, windows, uwp, maui, context, menu, container, popup, maui.menu, maui.popup, context.menu, .Net MAUI</PackageTags>
+    <PackageProjectUrl>https://github.com/jerry08/Plugin.ContextMenuContainer</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/jerry08/Plugin.ContextMenuContainer</RepositoryUrl>
+    <PackageLicenseExpression>LGPL-3.0-only</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
 </Project>
