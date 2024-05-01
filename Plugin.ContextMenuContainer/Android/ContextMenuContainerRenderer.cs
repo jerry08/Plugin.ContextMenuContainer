@@ -143,7 +143,7 @@ internal sealed class ContextMenuContainerRenderer : ContentViewHandler
                 return base.DispatchTouchEvent(e);
             }
 
-            if (ContextMenuIsNotEmpty && e.Action == MotionEventActions.Up)
+            if (ContextMenuIsNotEmpty && e.Action is MotionEventActions.Up)
             {
                 if (Element?.ShowOnClick == true)
                 {
@@ -154,12 +154,12 @@ internal sealed class ContextMenuContainerRenderer : ContentViewHandler
 
             bool result;
             Logger.Debug("ContextMenuContainer DispatchTouchEvent fired {0}", e.Action);
-            if (ContextMenuIsNotEmpty && e.Action == MotionEventActions.Down)
+            if (ContextMenuIsNotEmpty && e.Action is MotionEventActions.Down)
             {
                 // You can change the timespan of the long press
                 _timerFired = false;
                 _timer = new MyTimer(
-                    TimeSpan.FromMilliseconds(1500),
+                    TimeSpan.FromMilliseconds(Element!.LongPressDuration),
                     () =>
                     {
                         _timerFired = true;

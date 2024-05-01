@@ -39,8 +39,11 @@ internal sealed class ContextMenuContainerRenderer : ContentViewHandler
 
     private void PlatformViewPointerReleased(object sender, PointerRoutedEventArgs e)
     {
+        if (!Element.ShowOnClick)
+            return;
+
         var point = e.GetCurrentPoint(_platformView);
-        if (point.Properties.PointerUpdateKind != PointerUpdateKind.RightButtonReleased)
+        if (point.Properties.PointerUpdateKind is not PointerUpdateKind.RightButtonReleased)
         {
             return;
         }

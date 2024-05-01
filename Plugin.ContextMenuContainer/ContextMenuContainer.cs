@@ -33,6 +33,25 @@ public class ContextMenuContainer : ContentView
     }
 
     /// <summary>
+    /// Bindable property for <see cref="LongPressDuration"/>
+    /// </summary>
+    public static readonly BindableProperty LongPressDurationProperty = BindableProperty.Create(
+        nameof(LongPressDuration),
+        typeof(int),
+        typeof(ContextMenuContainer),
+        500
+    );
+
+    /// <summary>
+    /// Gets or sets the duration of the long press in milliseconds.
+    /// </summary>
+    public int LongPressDuration
+    {
+        get => (int)GetValue(LongPressDurationProperty);
+        set => SetValue(LongPressDurationProperty, value);
+    }
+
+    /// <summary>
     /// Call this in order to preserve our code during linking and allow namespace resolution in XAML.
     /// </summary>
     public static void Init()
