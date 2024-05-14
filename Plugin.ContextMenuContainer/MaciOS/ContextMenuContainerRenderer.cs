@@ -60,26 +60,19 @@ internal sealed class ContextMenuContainerRenderer : ContentViewHandler
                     .FirstOrDefault(x => x is Button or ImageButton);
                 if (buttonView is not null)
                 {
-                    var el = buttonView.ToPlatform(buttonView.Handler!.MauiContext!);
-                    if (el is UIButton button)
+                    var uiView = buttonView.ToPlatform(buttonView.Handler!.MauiContext!);
+
+                    var uiButton = uiView is UIButton button
+                        ? button
+                        : uiView.Subviews.OfType<UIButton>().FirstOrDefault();
+
+                    if (uiButton is not null)
                     {
-                        button.ShowsMenuAsPrimaryAction = true;
-                        button.Menu = _contextMenuDelegate?.GetMenu();
+                        uiButton.ShowsMenuAsPrimaryAction = true;
+                        uiButton.Menu = _contextMenuDelegate?.GetMenu();
                     }
                 }
             }
-
-            //if (newElement.Content is ImageButton b)
-            //{
-            //    var list = newElement.Content.GetVisualTreeDescendants().ToList();
-            //
-            //    var el = b.ToPlatform(b.Handler!.MauiContext!);
-            //    if (el is UIButton button)
-            //    {
-            //        button.ShowsMenuAsPrimaryAction = true;
-            //        button.Menu = _contextMenuDelegate?.GetMenu();
-            //    }
-            //}
 
             _wasSetOnce = true;
         }
