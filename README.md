@@ -5,7 +5,7 @@
 Maui plugin to add native context menu to any view. Supports all .NET MAUI platforms.
 
 ## Usage
-1. Add the `.UseContextMenu()` in your `MauiProgram.cs` as shown below:
+1. Add the `.ConfigureContextMenuContainer()` in your `MauiProgram.cs` as shown below:
 
 ```C#
 using Plugin.ContextMenuContainer;
@@ -15,7 +15,7 @@ using Plugin.ContextMenuContainer;
 builder
     .UseMauiApp<App>()
     .UseMauiCommunityToolkit()
-    .UseContextMenu();
+    .ConfigureContextMenuContainer();
 ```
 
 2. Add namespace to your XAML file
