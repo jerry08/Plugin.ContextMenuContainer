@@ -6,6 +6,7 @@
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
 		<!-- <TargetFrameworks>$(TargetFrameworks);$(NetVersion)-tizen</TargetFrameworks> -->
     <UseMaui>true</UseMaui>
+    <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
 		<SingleProject>true</SingleProject>
     <IsPackable>true</IsPackable>
 
@@ -25,9 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CSharpier.MsBuild" Version="0.28.2" PrivateAssets="all" />
-    <PackageReference Update="Microsoft.Maui.Controls" Version="8.0.21" />
-    <PackageReference Update="Microsoft.Maui.Controls.Compatibility" Version="8.0.21" />
+    <PackageReference Include="CSharpier.MsBuild" Version="0.29.0" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>
