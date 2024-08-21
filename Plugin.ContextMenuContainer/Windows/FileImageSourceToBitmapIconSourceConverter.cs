@@ -19,7 +19,7 @@ internal class FileImageSourceToBitmapIconSourceConverter : IValueConverter
 
         if (!string.IsNullOrWhiteSpace(source.File))
         {
-            result = new BitmapIcon() { UriSource = new Uri(_baseUri, source.File), };
+            result = new BitmapIcon() { UriSource = new Uri(_baseUri, source.File) };
         }
 
         return result;

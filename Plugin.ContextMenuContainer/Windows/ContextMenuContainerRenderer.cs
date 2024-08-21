@@ -141,7 +141,7 @@ internal sealed class ContextMenuContainerRenderer : ContentViewHandler
                 new WBinding()
                 {
                     Path = new PropertyPath(nameof(ContextMenuItem.Icon)),
-                    Converter = ImageConverter
+                    Converter = ImageConverter,
                 }
             );
         }
@@ -187,10 +187,7 @@ internal sealed class ContextMenuContainerRenderer : ContentViewHandler
 #pragma warning restore SA1201
         {
             TargetType = typeof(MenuFlyoutItem),
-            Setters =
-            {
-                new Setter(WControl.ForegroundProperty, new SolidColorBrush(WColors.Red)),
-            },
+            Setters = { new Setter(WControl.ForegroundProperty, new SolidColorBrush(WColors.Red)) },
         };
 
     private static Style NonDestructiveStyle { get; } =
