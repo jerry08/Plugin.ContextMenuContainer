@@ -147,6 +147,7 @@ internal sealed class ContextMenuContainerRenderer : ContentViewHandler
             {
                 if (Element?.ShowOnClick == true)
                 {
+                    _timer?.Stop();
                     OpenContextMenu();
                     return base.DispatchTouchEvent(e);
                 }
