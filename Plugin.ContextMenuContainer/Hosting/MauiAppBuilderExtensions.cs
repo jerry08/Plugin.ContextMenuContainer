@@ -8,7 +8,9 @@ public static class MauiAppBuilderExtensions
     {
         return builder.ConfigureMauiHandlers(handlers =>
         {
+#if ANDROID || IOS || WINDOWS || MACCATALYST
             handlers.AddHandler(typeof(ContextMenuContainer), typeof(ContextMenuContainerRenderer));
+#endif
         });
     }
 }
